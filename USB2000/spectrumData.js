@@ -1,0 +1,95 @@
+
+
+var ub = require('./utilBytes'),
+    utilBytes = new ub();
+var us = require('underscore');
+
+class spectrumData{
+    constructor(options, callback){
+        //class basic data
+        this.defaultOptions={
+            spectrumFrames:9,
+            errorTimeout:10000,
+        };
+        this.options = us.defaults(options || {}, this.defaultOptions);
+        this.callback = callback ? callback : () => {};
+
+        //spectrum specific values
+        this.dataCounter = 0;
+        this.spectrum = [];
+
+        //error timeout
+        this.timeout = false;
+
+        this.trigCallback = null;
+
+        //byte utilities
+        //this.utilBytes = new utilBytes();
+    }
+
+    newSpectrumRequest = (callback) =>{
+        this.spectrum = [];
+        this.dataCounter = 0;
+
+        this.callback = callback ? callback : (data, error)=>{ 
+            if(error){
+                console.error(error);
+            }else console.log(data);
+        };
+
+        //error timeout
+        this.timeout = setTimeout(()=>{
+            let error = "Timeout on request " + this.options.errorTimeout + "ms"
+            this.callback(null, error),
+            this.callback = () => {};
+        }, this.options.errorTimeout);
+
+    }
+
+    processData = (data) =>{
+        this.dataCounter++
+        if(this.dataCounter >= this.options.spectrumFrames){
+            //ok received the expected number of packets, clear the timeout and return processed data 
+            clearTimeout(this.timeout);
+            this.callback(this.spectrum, null);
+            if(this.trigCallback) this.trigCallback();
+
+        } else {
+            let values = this.convertData(data)
+            this.spectrum = this.spectrum.concat(values);
+        }
+    }
+
+    convertData = (data) =>{
+        if(data.length == 1) return
+        let convertedData = [];
+        
+        for(var i = 0; i < data.length; i+=2) {
+            let pixel = utilBytes.hex16BitToDecimal([data[i+1], data[i]]);
+            convertedData.push(pixel);
+        }
+
+        return convertedData
+    }
+
+    get data(){
+        return this.spectrum;
+    } 
+
+    set triggerCallback(cb){
+        this.trigCallback = cb;
+    }
+
+    reverseBits = (num, numBits) =>{
+        var reversedNum
+        var mask = 0
+
+        mask = (0x1 << (numBits/2)) -1
+        if(numBits === 1) return num
+        reversedNum = this.reverse(num >> numBits / 2, numBits / 2) | this.reverse((num & mask), numBits/2) << numBits/2;
+        return reversedNum
+    }
+
+}
+
+module.exports = spectrumData;

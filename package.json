@@ -1,0 +1,13 @@
+{
+  "dependencies": {
+    "global": "^4.4.0",
+    "nodemon": "^2.0.6",
+    "underscore": "^1.11.0",
+    "usb": "^1.6.3",
+    "yarn": "^1.22.10"
+  },
+  "scripts": {
+    "start": "nodemon oceanOptics.js",
+    "test": "nodemon testOceanDriver.js"
+  }
+}
