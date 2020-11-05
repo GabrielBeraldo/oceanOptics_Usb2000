@@ -48,14 +48,25 @@ class spectrumData{
 
     processData = (data) =>{
         this.dataCounter++
-        if(this.dataCounter >= this.options.spectrumFrames){
+        if(this.dataCounter >= this.options.spectrumFrames || data.length <=1){
             //ok received the expected number of packets, clear the timeout and return processed data 
             clearTimeout(this.timeout);
             this.callback(this.spectrum, null);
             if(this.trigCallback) this.trigCallback();
 
         } else {
-            let values = this.convertData(data)
+            //!
+            //!TEST IN, PROGRESS REVERT THIS!!!!!
+            //!
+
+            /*
+            let values = this.convertData(data);
+            this.spectrum = this.spectrum.concat(values);
+            */
+
+            let values = this.notConvert(data);
+            console.dir(values, {'maxArrayLength': null});
+            //this.convertDataTest(data);
             this.spectrum = this.spectrum.concat(values);
         }
     }
@@ -71,6 +82,7 @@ class spectrumData{
 
         return convertedData
     }
+
 
     get data(){
         return this.spectrum;
@@ -90,6 +102,41 @@ class spectrumData{
         return reversedNum
     }
 
+    //TEST!!!!!!!!!!!!!!!!
+    
+    notConvert = (data) =>{
+        if(data.length == 1) return
+        let convertedData = [];
+        
+        for(var i = 0; i < data.length; i++) {
+            //let bin = utilBytes.toBinary(data[i]);
+
+            convertedData.push(data[i]);
+        }
+
+        return convertedData
+    }
+
+    
+    convertDataTest = (data) =>{
+        if(data.length == 1) return;
+        let convertedData = [];
+        let offset = 64;
+
+        for(let i=0; i< data.length; i+=(offset*2)){
+            for(let j=0; j<offset; j++){
+                
+                let index = i+j;
+                
+                let lsb = data[index];
+                let msb = data[offset+index];
+
+                let pixel = utilBytes.hex16BitToDecimal([msb,lsb]);
+                convertedData.push(pixel);
+            }
+        }
+        return convertedData;
+    }
 }
 
 module.exports = spectrumData;

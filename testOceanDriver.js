@@ -1,10 +1,12 @@
+
+const plotlib = require('nodeplotlib');
 const oceanOpticsUSB2000 = require('./USB2000/USB2000.js');
 const us = require('underscore');
 const ub = require('./USB2000/utilBytes'),
     utilBytes = new ub();
 
-const {KalmanFilter} = require('kalman-filter'),
-    kFilter = new KalmanFilter();
+const KalmanFilter = require('kalmanjs');
+const kf = new KalmanFilter()
 
 const oceanOptics = new oceanOpticsUSB2000({
     errorTimeout:5000,
@@ -21,47 +23,64 @@ let spectrumData = {
     ABS:[]
 };
 
+
+let plotData = [
+    {   
+        name:"unfiltered",
+        y:[],
+        type:"line"
+    },
+    {   
+        name:"filterd",
+        y:[],
+        type:"line"
+    }
+]
+
+const filterSpectrumData = (data) =>{
+    let filtered = [];
+    data.map((pixel)=>{
+        filtered.push(kf.filter(pixel));
+    });
+    return filtered;
+}
+
 const handleSpectrumData = (data, error) =>{
     if(error){
         console.log("spectrum error: ", error);
         return
     }
-    console.log("unfiltered data:", data);
-    let filtered = kFilter.filterAll(data);
-    console.log("filtered data:", filtered);
+
+    plotData[0].y=data;
+    plotData[1].y=filterSpectrumData(data);
+
+    //console.log("unfiltered data:", plotData[0].y);
+
+    console.dir(plotData[0].y, {'maxArrayLength': null});
+    //console.log("filtered data:", plotData[1].y);
+
+    //plotlib.plot(plotData);
 }
 
 if(oceanOptics.isOperational){
+
     oceanOptics.requestSerialNumber((data, error)=>{
         deviceData.sn=data.toString();
-        console.log(deviceData);
     });
     
     oceanOptics.queryStatus((data)=>{
         deviceData = us.defaults(data, deviceData);
-        console.log(deviceData);
     });
 
-    //strobe on
-    oceanOptics.setStrobeEnableStatus(true, (status)=>{
-        let message = status ? "transmission success" : "transmission failed";
-        //console.log(message);
-    });
-
+    oceanOptics.setStrobeEnableStatus(true);
     oceanOptics.setIntegrationTime(100);
 
     //get spectrum
-    for(let i = 1; i<=1; i++){
-        
+    setTimeout(()=>{
         oceanOptics.requestSpectrum((data,error)=>handleSpectrumData(data, error));
-
-    }
-
-    oceanOptics.queryStatus((data)=>{
-        console.log('status data: ', data);
-    });
-    
-    oceanOptics.setStrobeEnableStatus(false);
+        
+        oceanOptics.setStrobeEnableStatus(false);
+    }, 1000);
 }
 
 console.log("deviceData", deviceData);

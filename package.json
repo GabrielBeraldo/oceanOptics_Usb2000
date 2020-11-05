@@ -1,7 +1,9 @@
 {
   "dependencies": {
     "global": "^4.4.0",
+    "kalmanjs": "^1.1.0",
     "nodemon": "^2.0.6",
+    "nodeplotlib": "^0.6.5",
     "underscore": "^1.11.0",
     "usb": "^1.6.3",
     "yarn": "^1.22.10"
