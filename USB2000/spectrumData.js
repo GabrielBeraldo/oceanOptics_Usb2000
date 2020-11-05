@@ -55,32 +55,29 @@ class spectrumData{
             if(this.trigCallback) this.trigCallback();
 
         } else {
-            //!
-            //!TEST IN, PROGRESS REVERT THIS!!!!!
-            //!
-
-            /*
             let values = this.convertData(data);
-            this.spectrum = this.spectrum.concat(values);
-            */
-
-            let values = this.notConvert(data);
-            console.dir(values, {'maxArrayLength': null});
-            //this.convertDataTest(data);
             this.spectrum = this.spectrum.concat(values);
         }
     }
 
     convertData = (data) =>{
-        if(data.length == 1) return
+        if(data.length == 1) return;
         let convertedData = [];
-        
-        for(var i = 0; i < data.length; i+=2) {
-            let pixel = utilBytes.hex16BitToDecimal([data[i+1], data[i]]);
-            convertedData.push(pixel);
-        }
+        let offset = 64;
 
-        return convertedData
+        for(let i=0; i< data.length; i+=(offset*2)){
+            for(let j=0; j<offset; j++){
+                
+                let index = i+j;
+                
+                let lsb = data[index];
+                let msb = data[offset+index];
+
+                let pixel = utilBytes.hex16BitToDecimal([msb,lsb]);
+                convertedData.push(pixel);
+            }
+        }
+        return convertedData;
     }
 
 
@@ -102,41 +99,6 @@ class spectrumData{
         return reversedNum
     }
 
-    //TEST!!!!!!!!!!!!!!!!
-    
-    notConvert = (data) =>{
-        if(data.length == 1) return
-        let convertedData = [];
-        
-        for(var i = 0; i < data.length; i++) {
-            //let bin = utilBytes.toBinary(data[i]);
-
-            convertedData.push(data[i]);
-        }
-
-        return convertedData
-    }
-
-    
-    convertDataTest = (data) =>{
-        if(data.length == 1) return;
-        let convertedData = [];
-        let offset = 64;
-
-        for(let i=0; i< data.length; i+=(offset*2)){
-            for(let j=0; j<offset; j++){
-                
-                let index = i+j;
-                
-                let lsb = data[index];
-                let msb = data[offset+index];
-
-                let pixel = utilBytes.hex16BitToDecimal([msb,lsb]);
-                convertedData.push(pixel);
-            }
-        }
-        return convertedData;
-    }
 }
 
 module.exports = spectrumData;
