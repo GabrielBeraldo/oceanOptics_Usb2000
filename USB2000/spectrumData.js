@@ -88,17 +88,6 @@ class spectrumData{
     set triggerCallback(cb){
         this.trigCallback = cb;
     }
-
-    reverseBits = (num, numBits) =>{
-        var reversedNum
-        var mask = 0
-
-        mask = (0x1 << (numBits/2)) -1
-        if(numBits === 1) return num
-        reversedNum = this.reverse(num >> numBits / 2, numBits / 2) | this.reverse((num & mask), numBits/2) << numBits/2;
-        return reversedNum
-    }
-
 }
 
 module.exports = spectrumData;

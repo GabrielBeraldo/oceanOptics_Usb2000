@@ -2,8 +2,6 @@
 const plotlib = require('nodeplotlib');
 const oceanOpticsUSB2000 = require('./USB2000/USB2000.js');
 const us = require('underscore');
-const ub = require('./USB2000/utilBytes'),
-    utilBytes = new ub();
 
 const KalmanFilter = require('kalmanjs');
 const kf = new KalmanFilter({R: 1, Q: 5})
@@ -13,9 +11,7 @@ const oceanOptics = new oceanOpticsUSB2000({
     logRawTransmittedData:false
 });
 
-
 const testData = require(`./testData.json`);
-const { filter } = require('underscore');
 
 let deviceData = {
     sn:''
@@ -89,10 +85,12 @@ const handleSpectrumData = (data, error) =>{
 
     //console.dir(plotData[0].y, {'maxArrayLength': null});
     
+    /*
     plotlib.stack([plotData[0], plotData[1]]);
     plotlib.stack([plotData[2]]);
     plotlib.stack([plotData[3]]);
     plotlib.plot();
+    */
 }
 
 if(oceanOptics.isOperational){
@@ -116,6 +114,6 @@ if(oceanOptics.isOperational){
     }, 1000);
 }
 
-console.log("deviceData", deviceData);
-console.log("spectrumData", spectrumData);
+//console.log("deviceData", deviceData);
+//console.log("spectrumData", spectrumData);
 
