@@ -2,6 +2,7 @@
 const plotlib = require('nodeplotlib');
 const oceanOpticsUSB2000 = require('./USB2000/USB2000.js');
 const us = require('underscore');
+const regression = require('regression');
 
 const KalmanFilter = require('kalmanjs');
 const kf = new KalmanFilter({R: 1, Q: 5})
@@ -112,6 +113,10 @@ if(oceanOptics.isOperational){
         
         oceanOptics.setStrobeEnableStatus(false);
     }, 1000);
+
+    setTimeout(()=>{
+        console.log(oceanOptics.deviceConfiguration);
+    }, 2000);
 }
 
 //console.log("deviceData", deviceData);

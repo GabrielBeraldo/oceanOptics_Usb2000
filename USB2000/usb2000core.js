@@ -43,7 +43,10 @@ class USB2000{
             command:[]
         }
 
-        this.spectrumPacketCounter=0;
+        this.deviceConfigurationData={
+
+        }
+
         //set options 
         this.options = us.defaults(options || {}, this.defaultOptions);
         //console.log(this.options);
@@ -52,6 +55,7 @@ class USB2000{
         if(this.initialize()){
             this.configEndpoints();
             this.usbClaim();
+            this.queryInformation();
         } 
 
         //this.utilBytes = new utilBytes();
@@ -167,7 +171,7 @@ class USB2000{
     processCommand = (cmd, additionalData=undefined, callback=null) => {
         //console.log(cmd);
         let data=cmd.address;
-        let imediatCallback = false;
+        let immediateCallback = false;
 
         //check if its available to receive commands if not add to queue
         if(this.control.busy){
@@ -200,7 +204,7 @@ class USB2000{
             if(cmd.responds){
                 this.queue.callback.push(callback);
                 this.queue.dataHandler.push(commands.dataHandlers(cmd.name));
-            }else imediatCallback = true;
+            }else immediateCallback = true;
         }
 
         //transfer to usb specific endpoint and set state as busy
@@ -208,7 +212,7 @@ class USB2000{
         let transmitted = this.transmitRawToUsb(buffer);
         
         //calback with true or false depending of the transmission success
-        if(transmitted && imediatCallback) callback(transmitted,null);
+        if(transmitted && immediateCallback) callback(transmitted,null);
         
         //trigger again if the current command send wont respond
         if(!cmd.responds && !this.control.waitingSpectrum){
@@ -288,13 +292,24 @@ class USB2000{
         //data must be organized as:
         //byte 1 = LSB, byte 2 = MSB;
         let data=[lsb, msb];
-        let buf = Buffer.from(data);
         this.processCommand(cmd, data, callback);
     }
 
     queryStatus = (callback=null) =>{
         let cmd = commands.get('queryStatus');
         this.processCommand(cmd,null,callback);
+    }
+
+    queryInformation = () =>{
+        let cmd = commands.get('queryInformation');
+        let infoBytes = commands.informationBytes;
+
+        for(let data in infoBytes){
+            this.processCommand(cmd, infoBytes[data], (d)=>{
+                //store the returned data to device configuration object 
+                this.deviceConfigurationData[data] = d;
+            })
+        }
     }
     //------------------------------------------------------------------
     // getters and setters
@@ -308,6 +323,9 @@ class USB2000{
         return this.spectrumData.data
     }
 
+    get deviceConfiguration(){
+        return this.deviceConfigurationData
+    }
     //------------------------------------------------------------------
     // temp test functions
     //------------------------------------------------------------------

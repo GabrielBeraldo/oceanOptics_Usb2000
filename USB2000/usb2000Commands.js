@@ -4,26 +4,24 @@ var ub = require('./utilBytes'),
 class usb2000Commands{
     
     constructor(){
-        this.config_regs = {
-            0: 'serial_number',
-            1: '0_order_wavelength_coeff',
-            2: '1_order_wavelength_coeff',
-            3: '2_order_wavelength_coeff',
-            4: '3_order_wavelength_coeff',
-            5: 'stray_light_constant',
-            6: '0_order_nonlinear_coeff',
-            7: '1_order_nonlinear_coeff',
-            8: '2_order_nonlinear_coeff',
-            9: '3_order_nonlinear_coeff',
-            10: '4_order_nonlinear_coeff',
-            11: '5_order_nonlinear_coeff',
-            12: '6_order_nonlinear_coeff',
-            13: '7_order_nonlinear_coeff',
-            14: 'polynomial_order',
-            15: 'bench_configuration',
-            16: 'USB4000_config',
-            17: 'autonull',
-            18: 'baud_rate' 
+        this.informationBytesData = {
+            'serial_number': 0x00,
+            '0_order_wavelength_coeff': 0x01,
+            '1_order_wavelength_coeff': 0x02,
+            '2_order_wavelength_coeff': 0x03,
+            '3_order_wavelength_coeff': 0x04,
+            'stray_light_constant': 0x05,
+            '0_order_nonlinear_coeff': 0x06,
+            '1_order_nonlinear_coeff': 0x07,
+            '2_order_nonlinear_coeff': 0x08,
+            '3_order_nonlinear_coeff': 0x09,
+            '4_order_nonlinear_coeff': 0x0A,
+            '5_order_nonlinear_coeff': 0x0B,
+            '6_order_nonlinear_coeff': 0x0C,
+            '7_order_nonlinear_coeff': 0x0D,
+            'polynomial_order': 0x0E,
+            'bench_configuration': 0x0F,
+            'USB2000_config': 0x10
         }   
         
         this.commands={
@@ -36,7 +34,7 @@ class usb2000Commands{
             getSerialnumber:this.returnCommand('getSerialNumber', 0x08, true),
             requestSpectrum:this.returnCommand('requestSpectrum', 0x09, false),
             setTriggerMode:this.returnCommand('setTriggerMode',0x0A, true),
-            queryPlugind:this.returnCommand('queryPlugins',0x0B,true),
+            queryPlugins:this.returnCommand('queryPlugins',0x0B,true),
             pluginsId:this.returnCommand('pluginsId',0x0C,true),
             detectPlugins:this.returnCommand('detectPlugins', 0x0D, true),
             queryStatus:this.returnCommand('queryStatus', 0xFE, true)
@@ -71,6 +69,19 @@ class usb2000Commands{
                 response.spectrumReady = parseInt(bytes[8],2);
 
                 return response
+            },
+            queryInformation(data){
+                //remove the fist two bytes that refers to the command address(0x05) and related information byte()
+                
+                let buf = data.slice(2, data.length);
+                console.log(buf);
+
+                let value = buf.toString("utf8");
+                let numericValue = parseFloat(value);
+
+                value = value.replace(/[^ -~]+/g,'');
+                //console.log("numericValue :", numericValue);
+                return  !isNaN(numericValue) ? numericValue : value;
             }
         }
     }
@@ -87,6 +98,10 @@ class usb2000Commands{
         if(this.commands.hasOwnProperty(name)){
             return this.commands[name];
         }else return false
+    }
+
+    get informationBytes(){
+        return this.informationBytesData
     }
 
     dataHandlers=(name)=>{
