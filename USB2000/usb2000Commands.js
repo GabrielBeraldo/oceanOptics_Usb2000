@@ -72,16 +72,13 @@ class usb2000Commands{
             },
             queryInformation(data){
                 //remove the fist two bytes that refers to the command address(0x05) and related information byte()
-                
                 let buf = data.slice(2, data.length);
-                console.log(buf);
-
+                
                 let value = buf.toString("utf8");
                 let numericValue = parseFloat(value);
 
-                value = value.replace(/[^ -~]+/g,'');
-                //console.log("numericValue :", numericValue);
-                return  !isNaN(numericValue) ? numericValue : value;
+                let response = !isNaN(numericValue) ? numericValue: value.replace(/[^ -~]+/g,'');
+                return  response;
             }
         }
     }
