@@ -19,10 +19,8 @@ class USB2000{
         this.defaultOptions = {
             VID: 0x2457,
             PID: 0x1002,
-            integrationTime: 3000,
+            integrationTime: 100,
             strobeEnableStatus: 0,
-            model: 'hr4000',
-            shutdownMode: 0,
             triggerMode: 0,
             spectrumFrames:9,
             errorTimeout:10000,

@@ -2,6 +2,7 @@
   "dependencies": {
     "global": "^4.4.0",
     "kalmanjs": "^1.1.0",
+    "moving-averages": "^4.0.5",
     "nodemon": "^2.0.6",
     "nodeplotlib": "^0.6.5",
     "regression": "^2.0.1",
